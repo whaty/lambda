@@ -29,7 +29,7 @@ Lambda语法 <br>
 (parameters)->expression 或者 (parameters)->{statements;} 
 >     Lambda表达式由三部分组成： 
 >     1.parameters:类似方法中的形参列表，这里的参数是函数式接口里的参数。这里的参数类型可以明确的声明也可不声明而由JVM隐含的推断，当只有一个推断类型时可以省略掉圆括号。 
->     2.-:可以理解为“被用于”的意思 
+>     2.->可以理解为“被用于”的意思 
 >     3.方法体：可以是表达式也可以是代码块，实现函数式接口中的方法。这个方法体可以有返回值也可以没有返回值
 
 
@@ -37,7 +37,7 @@ Lambda语法 <br>
 >     1.不接受参数，直接返回1
 >     ()->1
 >     2.接受两个int类型的参数，返回这两个参数的和
->     (int x,int y )-x+y
+>     (int x,int y )->x+y
 >     3.接受x,y两个参数，JVM根据上下文推断参数的类型，返回两个参数的和
 >     (x,y)->x+y
 >     4.接受一个字符串，打印该字符串，没有返回值
@@ -137,7 +137,7 @@ Lambda语法 <br>
 # **方法引用** #
 >     在lambda表达式中，方法引用是一种简化写法，引用的方法就是Lambda表达式的方法体的实现 
 >     语法结构：ObjectRef:: methodName 
->     左边是类名或者实例名，中间的“：：”是方法引用符号，右边是相应的方法名 
+>     左边是类名或者实例名，中间的“::”是方法引用符号，右边是相应的方法名 
 >     方法引用一般分为三类： 
 >     静态方法引用，实例方法引用，构造方法引用
 
@@ -211,68 +211,24 @@ Lambda语法 <br>
  		//传统方式
         Factory factory1 = new Factory() {
             @Override
-            public Parent create(String name, int age) {
-                return new Boy(name,age);
+            public Obj create() {
+                return new Obj();
             }
         };
-        Boy boy = (Boy) factory1.create("小明",18);
-        factory1 = new Factory() {
-            @Override
-            public Parent create(String name, int age) {
-                return new Girl(name,age);
-            }
-        };
-        Girl girl = (Girl) factory1.create("小红",18);
-        //Lambda方式
-        Factory<Boy> boyFactory = Boy::new;
-        Boy boy1 = boyFactory.create("小明",18);
-        Factory<Girl> girlFactory = Girl::new;
-        Girl girl1 = girlFactory.create("小红",18);
+        Obj obj = (Boy) factory1.create();
+        obj.strToInteger("1");
+        
+        //Lambda构造函数引用方式,
+        Factory factory = Obj::new;
+        Obj obj1 = factory.create();
+        Transform<String, Integer> transform3 = obj1::strToInteger;
 
 **其他类和接口：**
 
 	//工厂类接口
-	public interface Factory<T extends Parent> {
-	    T create(String name,int age);
-	}
-
-	//父类
-	public class Parent {
-	    private String name ;
-	    private int age;
-	    public Parent(String name, int age) {
-	        this.name = name;
-	        this.age = age;
-	    }
-	    public void doSome(){
-	
-	    }
-	}
-
-	//男孩类
-	public class Boy extends Parent {
-	    public Boy(String name, int age) {
-	        super(name, age);
-	    }
-	
-	    @Override
-	    public void doSome() {
-	        System.out.println("我是个男孩");
-	    }
-	}
-
-	//女孩类
-	public class Girl extends Parent {
-	    public Girl(String name, int age) {
-	        super(name, age);
-	    }
-	
-	    @Override
-	    public void doSome() {
-	        System.out.println("我是个女孩");
-	    }
-	}
-
+	public interface Factory {
+        Obj create();
+    }
 
 ----------
 
@@ -316,23 +272,11 @@ Lambda语法 <br>
 	 * Function接口：接受一个参数，返回单一的结果。默认的方法（andThen）可将多个函数串在一起，形成复合Funtion（有输入，有输出）结果
 	 */
 	public static void functionTest(){
-        Function<String, Integer> toInteger = Integer::valueOf;
-        //toInteger的执行结果作为第二个backToString的输入
-        Function<String, String> backToString = toInteger.andThen(String::valueOf);
-        String result = backToString.apply("1234");
-        System.out.println(result);
-
-        Function<Integer, Integer> add = (i) -> {
-            System.out.println("frist input:" + i);
-            return i * 2;
-        };
-        Function<Integer, Integer> zero = add.andThen((i) -> {
-            System.out.println("second input:" + i);
-            return i * 0;
-        });
-
-        Integer res = zero.apply(8);
-        System.out.println(res);
+         Function<String, String> function = s -> {
+               return s + "1";
+           };
+           Function<String, Integer> function1 = function.andThen(String::length);
+           System.out.println(function1.apply("222"));
     }
 **Supplier接口**
 
@@ -340,9 +284,9 @@ Lambda语法 <br>
 	 * Supplier接口：返回一个给定类型的结果。不需要输入参数，无输入有输出
 	 */
 	private static void supplierTest(){
-        Supplier<String> supplier = () -> "我就是输出";
-        String s = supplier.get();
-        System.out.println(s);
+       Supplier<String> supplier = () -> "无输入有输出";
+       String s = supplier.get();
+       System.out.println(s);
     }
 
 # **串行stream操作** #
