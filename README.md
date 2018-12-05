@@ -1,6 +1,8 @@
 # lambda
 java8 lambda 表达式详细教程
 
+
+
 # **简介**  <br>
 
 学习lambda表达式就要先知道函数式接口是什么？
